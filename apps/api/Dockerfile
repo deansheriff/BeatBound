@@ -1,0 +1,40 @@
+# Build stage
+FROM oven/bun:1.0 AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json bun.lockb* ./
+
+# Install dependencies
+RUN bun install --frozen-lockfile
+
+# Copy source code
+COPY . .
+
+# Build
+RUN bun run build
+
+# Production stage
+FROM oven/bun:1.0-slim AS runner
+
+WORKDIR /app
+
+# Copy built files
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
+
+# Set environment
+ENV NODE_ENV=production
+ENV PORT=3001
+
+# Expose port
+EXPOSE 3001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3001/health || exit 1
+
+# Run
+CMD ["bun", "run", "dist/index.js"]

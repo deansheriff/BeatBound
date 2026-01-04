@@ -1,0 +1,174 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-inter: 'Inter', sans-serif;
+  --font-outfit: 'Outfit', sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-surface-700;
+  }
+
+  body {
+    @apply bg-surface-950 text-surface-100 font-sans antialiased;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+}
+
+@layer components {
+  /* Button variants */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold rounded-xl
+           transition-all duration-300 ease-out
+           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-surface-950
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-gradient-to-r from-brand-500 to-brand-600 text-white
+           hover:from-brand-400 hover:to-brand-500 hover:shadow-lg hover:shadow-brand-500/25
+           focus:ring-brand-500 active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply btn bg-surface-800 text-surface-100 border border-surface-700
+           hover:bg-surface-700 hover:border-surface-600
+           focus:ring-surface-500;
+  }
+
+  .btn-accent {
+    @apply btn bg-gradient-to-r from-accent-500 to-accent-600 text-white
+           hover:from-accent-400 hover:to-accent-500 hover:shadow-lg hover:shadow-accent-500/25
+           focus:ring-accent-500;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-surface-300
+           hover:bg-surface-800 hover:text-surface-100
+           focus:ring-surface-500;
+  }
+
+  .btn-hype {
+    @apply btn px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white
+           hover:from-rose-400 hover:to-pink-400 hover:shadow-lg hover:shadow-rose-500/30
+           focus:ring-rose-500 active:scale-95;
+  }
+
+  .btn-hype.active {
+    @apply from-rose-600 to-pink-600 shadow-inner;
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-surface-900/50 backdrop-blur-sm border border-surface-800 rounded-2xl
+           transition-all duration-300;
+  }
+
+  .card-hover {
+    @apply card hover:bg-surface-800/50 hover:border-surface-700 hover:shadow-xl hover:shadow-surface-950/50;
+  }
+
+  .card-glow {
+    @apply card hover:shadow-xl hover:shadow-brand-500/10 hover:border-brand-500/30;
+  }
+
+  /* Input styles */
+  .input {
+    @apply w-full px-4 py-3 bg-surface-900 border border-surface-700 rounded-xl
+           text-surface-100 placeholder-surface-500
+           focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500
+           transition-all duration-200;
+  }
+
+  .input-error {
+    @apply input border-red-500 focus:ring-red-500/50 focus:border-red-500;
+  }
+
+  /* Badge styles */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full;
+  }
+
+  .badge-free {
+    @apply badge bg-emerald-500/20 text-emerald-400 border border-emerald-500/30;
+  }
+
+  .badge-paid {
+    @apply badge bg-amber-500/20 text-amber-400 border border-amber-500/30;
+  }
+
+  .badge-live {
+    @apply badge bg-red-500/20 text-red-400 border border-red-500/30;
+  }
+
+  .badge-ended {
+    @apply badge bg-surface-600/20 text-surface-400 border border-surface-600/30;
+  }
+
+  /* Container */
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-surface-900/30 backdrop-blur-xl border border-surface-700/50;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-400 via-brand-500 to-accent-400 bg-clip-text text-transparent;
+  }
+
+  /* Video thumbnail */
+  .video-thumbnail {
+    @apply relative aspect-video bg-surface-800 rounded-xl overflow-hidden
+           transition-transform duration-300 hover:scale-[1.02];
+  }
+
+  /* Skeleton loading */
+  .skeleton {
+    @apply animate-pulse bg-surface-800 rounded;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Custom scrollbar for supported browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-surface-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-surface-700 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-surface-600;
+}

@@ -1,0 +1,22 @@
+{
+  "name": "beatbound",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "cd apps/api && bun run dev",
+    "dev:web": "cd apps/web && npm run dev",
+    "build": "npm run build:api && npm run build:web",
+    "build:api": "cd apps/api && bun run build",
+    "build:web": "cd apps/web && npm run build",
+    "db:generate": "cd apps/api && bunx drizzle-kit generate",
+    "db:push": "cd apps/api && bunx drizzle-kit push",
+    "db:studio": "cd apps/api && bunx drizzle-kit studio"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
