@@ -1,9 +1,22 @@
 # Build stage
 FROM node:20-alpine AS builder
 WORKDIR /app
-COPY package.json package-lock.json* ./
+
+# Copy root package files
+COPY package.json package-lock.json ./
+
+# Copy workspace package files
+COPY apps/web/package.json ./apps/web/
+COPY apps/api/package.json ./apps/api/
+
+# Install dependencies
 RUN npm ci
+
+# Copy source code
 COPY . .
+
+# Build the web app
+WORKDIR /app/apps/web
 RUN npm run build
 
 # Production stage
@@ -17,9 +30,10 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Copy necessary files
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Make sure to copy from the correct location in the builder
+COPY --from=builder /app/apps/web/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./.next/static
 
 USER nextjs
 
