@@ -6,7 +6,7 @@ import { useAuthStore } from '@/lib/store';
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Trophy, Clock, Download, Share2, AlertCircle, Loader2 } from 'lucide-react';
-import { cn, formatCurrency, formatRelativeTime } from '@/lib/utils';
+import { cn, formatCurrency, formatRelativeTime, getInitials } from '@/lib/utils';
 import FileUploader from '@/components/FileUploader';
 import SubmissionCard from '@/components/SubmissionCard';
 import { format } from 'date-fns';

@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import Link from 'next/link';
-import { Trophy, Clock, Users, Zap, Search, Filter } from 'lucide-react';
+import { Trophy, Clock, Users, Zap, Search, Filter, Video } from 'lucide-react';
 import { cn, formatCurrency, formatRelativeTime, getInitials } from '@/lib/utils';
 import { useState } from 'react';
 
