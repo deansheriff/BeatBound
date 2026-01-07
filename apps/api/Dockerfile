@@ -4,10 +4,10 @@ FROM oven/bun:1.0 AS builder
 WORKDIR /app
 
 # Copy package files
-COPY package.json bun.lockb* ./
+COPY package.json ./
 
-# Install dependencies
-RUN bun install --frozen-lockfile
+# Install dependencies (without frozen-lockfile since we don't commit bun.lockb)
+RUN bun install
 
 # Copy source code
 COPY . .
@@ -32,9 +32,9 @@ ENV PORT=3001
 # Expose port
 EXPOSE 3001
 
-# Health check
+# Health check - use wget instead of curl (alpine-based)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3001/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
 
 # Run
 CMD ["bun", "run", "dist/index.js"]
