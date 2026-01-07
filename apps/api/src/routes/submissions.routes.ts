@@ -83,11 +83,11 @@ export const submissionRoutes = new Elysia({ prefix: '/submissions' })
     });
 
 // Nested under challenges
-export const challengeSubmissionRoutes = new Elysia({ prefix: '/challenges/:challengeId/submissions' })
+export const challengeSubmissionRoutes = new Elysia({ prefix: '/challenges/:id/submissions' })
     .use(authMiddleware)
     // List submissions for a challenge
     .get('/', async ({ params, query }) => {
-        const { challengeId } = params;
+        const { id: challengeId } = params;
         const { sort = 'votes', limit = '20', offset = '0' } = query as {
             sort?: 'votes' | 'recent';
             limit?: string;
@@ -119,7 +119,7 @@ export const challengeSubmissionRoutes = new Elysia({ prefix: '/challenges/:chal
     .post('/', async ({ params, body, user, set }) => {
         try {
             const authedUser = requireRole(user, ['ARTIST']);
-            const { challengeId } = params;
+            const { id: challengeId } = params;
 
             // Check challenge exists and is active
             const challenge = await db.query.challenges.findFirst({
@@ -229,3 +229,4 @@ export const challengeSubmissionRoutes = new Elysia({ prefix: '/challenges/:chal
             return { error: (e as Error).message };
         }
     });
+
