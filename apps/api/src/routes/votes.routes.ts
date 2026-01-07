@@ -5,13 +5,13 @@ import { eq, and, desc } from 'drizzle-orm';
 import { authMiddleware, requireAuth } from './auth.routes';
 import { leaderboard, cache } from '../lib/redis';
 
-export const voteRoutes = new Elysia({ prefix: '/submissions/:submissionId' })
+export const voteRoutes = new Elysia({ prefix: '/submissions/:id' })
     .use(authMiddleware)
     // Add a "Hype" vote (authenticated users only)
     .post('/hype', async ({ params, user, set }) => {
         try {
             const authedUser = requireAuth(user);
-            const { submissionId } = params;
+            const { id: submissionId } = params;
 
             // Check submission exists
             const submission = await db.query.submissions.findFirst({
@@ -85,7 +85,7 @@ export const voteRoutes = new Elysia({ prefix: '/submissions/:submissionId' })
     .delete('/hype', async ({ params, user, set }) => {
         try {
             const authedUser = requireAuth(user);
-            const { submissionId } = params;
+            const { id: submissionId } = params;
 
             const submission = await db.query.submissions.findFirst({
                 where: eq(submissions.id, submissionId),
@@ -150,7 +150,7 @@ export const voteRoutes = new Elysia({ prefix: '/submissions/:submissionId' })
             return { hasVoted: false };
         }
 
-        const { submissionId } = params;
+        const { id: submissionId } = params;
 
         // Quick cache check
         const hasVoted = await cache.hasVoted(user.id, submissionId);
@@ -176,9 +176,9 @@ export const voteRoutes = new Elysia({ prefix: '/submissions/:submissionId' })
     });
 
 // Leaderboard route for challenges
-export const leaderboardRoutes = new Elysia({ prefix: '/challenges/:challengeId/leaderboard' })
+export const leaderboardRoutes = new Elysia({ prefix: '/challenges/:id/leaderboard' })
     .get('/', async ({ params, query }) => {
-        const { challengeId } = params;
+        const { id: challengeId } = params;
         const { limit = '10' } = query as { limit?: string };
 
         // Get top submissions from Redis leaderboard
@@ -213,3 +213,4 @@ export const leaderboardRoutes = new Elysia({ prefix: '/challenges/:challengeId/
             submission: detailsMap.get(entry.submissionId),
         }));
     });
+
