@@ -1,0 +1,30 @@
+{
+    "name": "@beatbound/database",
+    "version": "1.0.0",
+    "type": "module",
+    "main": "./src/index.ts",
+    "types": "./src/index.ts",
+    "exports": {
+        ".": {
+            "import": "./src/index.ts",
+            "types": "./src/index.ts"
+        }
+    },
+    "scripts": {
+        "generate": "drizzle-kit generate",
+        "migrate": "drizzle-kit migrate",
+        "push": "drizzle-kit push",
+        "studio": "drizzle-kit studio"
+    },
+    "dependencies": {
+        "drizzle-orm": "^0.29.3"
+    },
+    "peerDependencies": {
+        "postgres": "^3.4.3"
+    },
+    "devDependencies": {
+        "drizzle-kit": "^0.20.9",
+        "postgres": "^3.4.3",
+        "typescript": "^5.3.3"
+    }
+}
