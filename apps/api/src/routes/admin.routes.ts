@@ -256,7 +256,9 @@ router.get(
     '/challenges',
     asyncHandler(async (req, res) => {
         const { page = 1, limit = 20, status } = req.query;
-        const offset = (Number(page) - 1) * Number(limit);
+        const pageNum = Number(page);
+        const limitNum = Number(limit);
+        const offset = (pageNum - 1) * limitNum;
 
         const conditions = [];
         if (status !== 'all' && isChallengeStatus(status)) {
@@ -282,10 +284,23 @@ router.get(
             .innerJoin(users, eq(challenges.producerId, users.id))
             .where(conditions.length > 0 ? and(...conditions) : undefined)
             .orderBy(desc(challenges.createdAt))
-            .limit(Number(limit))
+            .limit(limitNum)
             .offset(offset);
 
-        res.json({ challenges: challengeList });
+        const [countResult] = await db
+            .select({ count: sql<number>`count(*)::int` })
+            .from(challenges)
+            .where(conditions.length > 0 ? and(...conditions) : undefined);
+
+        res.json({
+            challenges: challengeList,
+            pagination: {
+                page: pageNum,
+                limit: limitNum,
+                total: countResult?.count || 0,
+                totalPages: Math.ceil((countResult?.count || 0) / limitNum),
+            },
+        });
     })
 );
 
@@ -513,7 +528,9 @@ router.get(
     '/reports',
     asyncHandler(async (req, res) => {
         const { page = 1, limit = 20, status } = req.query;
-        const offset = (Number(page) - 1) * Number(limit);
+        const pageNum = Number(page);
+        const limitNum = Number(limit);
+        const offset = (pageNum - 1) * limitNum;
         const reportStatus = isReportStatus(status) ? status : 'PENDING';
 
         const reportList = await db
@@ -535,10 +552,23 @@ router.get(
             .innerJoin(users, eq(reports.reporterId, users.id))
             .where(eq(reports.status, reportStatus))
             .orderBy(desc(reports.createdAt))
-            .limit(Number(limit))
+            .limit(limitNum)
             .offset(offset);
 
-        res.json({ reports: reportList });
+        const [countResult] = await db
+            .select({ count: sql<number>`count(*)::int` })
+            .from(reports)
+            .where(eq(reports.status, reportStatus));
+
+        res.json({
+            reports: reportList,
+            pagination: {
+                page: pageNum,
+                limit: limitNum,
+                total: countResult?.count || 0,
+                totalPages: Math.ceil((countResult?.count || 0) / limitNum),
+            },
+        });
     })
 );
 
