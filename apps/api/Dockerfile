@@ -20,7 +20,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Build the API
-RUN npm run build -w @beatbound/api
+RUN npm run build -w @beatbound/database && npm run build -w @beatbound/api
 
 # Production image, copy all the files and run next
 FROM base AS runner
