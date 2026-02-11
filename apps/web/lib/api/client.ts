@@ -102,6 +102,8 @@ export const authApi = {
 
 // Users API
 export const usersApi = {
+    dashboard: () => api.get('/users/me/dashboard'),
+
     getByUsername: (username: string) => api.get(`/users/${username}`),
 
     updateProfile: (data: {
