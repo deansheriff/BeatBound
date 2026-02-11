@@ -59,6 +59,15 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       S3_BUCKET_NAME: ${S3_BUCKET_NAME}
       CLOUDFRONT_DOMAIN: ${CLOUDFRONT_DOMAIN}
+    command:
+      - sh
+      - -c
+      - |
+        until npm run db:push; do
+          echo "Database not ready, retrying migration push in 3s...";
+          sleep 3;
+        done;
+        node apps/api/dist/index.js
     ports:
       - '${API_PORT:-4000}:4000'
 
