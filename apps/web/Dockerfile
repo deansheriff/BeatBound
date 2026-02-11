@@ -12,7 +12,7 @@ COPY apps/api/package.json ./apps/api/
 COPY apps/web/package.json ./apps/web/
 COPY packages/database/package.json ./packages/database/
 
-RUN npm ci
+RUN npm ci --foreground-scripts --no-audit --no-fund
 
 # Rebuild the source code only when needed
 FROM base AS builder
