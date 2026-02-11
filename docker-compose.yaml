@@ -59,6 +59,11 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       S3_BUCKET_NAME: ${S3_BUCKET_NAME}
       CLOUDFRONT_DOMAIN: ${CLOUDFRONT_DOMAIN}
+      SEED_ADMIN: ${SEED_ADMIN:-true}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@beatbound.sherpackage.com}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-beatbound_admin}
+      ADMIN_DISPLAY_NAME: ${ADMIN_DISPLAY_NAME:-BeatBound Admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-BeatboundAdmin@2026}
     command:
       - sh
       - -c

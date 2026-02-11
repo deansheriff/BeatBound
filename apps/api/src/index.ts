@@ -11,6 +11,7 @@ import { apiLimiter } from './middleware/rate-limit.js';
 import { logger } from './utils/logger.js';
 import { checkDatabaseConnection } from './config/database.js';
 import { checkRedisConnection } from './config/redis.js';
+import { ensureAdminUser } from './utils/bootstrap-admin.js';
 
 // Import routes
 import authRoutes from './routes/auth.routes.js';
@@ -124,10 +125,20 @@ process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
 
 // Start server
-app.listen(PORT, () => {
-    logger.info(`🚀 BeatBound API running on port ${PORT}`);
-    logger.info(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
-    logger.info(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
-});
+async function startServer() {
+    try {
+        await ensureAdminUser();
+    } catch (error) {
+        logger.error('Failed to bootstrap admin user:', error);
+    }
+
+    app.listen(PORT, () => {
+        logger.info(`🚀 BeatBound API running on port ${PORT}`);
+        logger.info(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+        logger.info(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
+    });
+}
+
+startServer();
 
 export default app;
