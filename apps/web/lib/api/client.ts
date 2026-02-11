@@ -1,9 +1,9 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/lib/store/auth';
 
-// If no env var is set, default to empty string which means relative path (same domain)
-// For local dev, we might still want localhost:4000 if not proxying, but generally we want proxying.
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+// Force same-origin API usage so the web app always calls `/api/*` on the current domain.
+// This avoids CORS/preflight issues in single-domain deployments (e.g. Coolify + reverse proxy).
+const API_BASE_URL = '';
 
 export const api = axios.create({
     baseURL: API_BASE_URL ? `${API_BASE_URL}/api` : '/api',

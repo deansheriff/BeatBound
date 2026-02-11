@@ -66,8 +66,6 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
     restart: unless-stopped
     depends_on:
       api:
@@ -76,7 +74,6 @@ services:
       NODE_ENV: production
       PORT: 3000
       API_INTERNAL_URL: ${API_INTERNAL_URL:-http://api:4000}
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://beatbound.sherpackage.com}
     ports:
       - '${WEB_PORT:-3000}:3000'
