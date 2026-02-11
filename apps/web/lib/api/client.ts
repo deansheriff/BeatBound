@@ -215,4 +215,72 @@ export const paymentsApi = {
     onboardStatus: () => api.get('/payments/onboard/status'),
 };
 
+// Admin API
+export const adminApi = {
+    listUsers: (params?: {
+        page?: number;
+        limit?: number;
+        role?: 'FAN' | 'ARTIST' | 'PRODUCER' | 'ADMIN';
+        search?: string;
+        suspended?: boolean;
+    }) => api.get('/admin/users', { params }),
+
+    updateUserRole: (id: string, role: 'FAN' | 'ARTIST' | 'PRODUCER' | 'ADMIN') =>
+        api.patch(`/admin/users/${id}/role`, { role }),
+
+    suspendUser: (id: string, suspended: boolean, reason?: string) =>
+        api.patch(`/admin/users/${id}/suspend`, { suspended, reason }),
+
+    listChallenges: (params?: {
+        page?: number;
+        limit?: number;
+        status?: 'DRAFT' | 'ACTIVE' | 'VOTING' | 'ENDED' | 'CANCELLED' | 'all';
+    }) => api.get('/admin/challenges', { params }),
+
+    getChallenge: (id: string) => api.get(`/admin/challenges/${id}`),
+
+    createChallenge: (data: {
+        producerId: string;
+        title: string;
+        description: string;
+        genre: string;
+        beatUrl: string;
+        coverImageUrl?: string;
+        rules?: string;
+        status?: 'DRAFT' | 'ACTIVE' | 'VOTING' | 'ENDED' | 'CANCELLED';
+        prizeAmount?: number;
+        maxSubmissions?: number;
+        submissionDeadline?: string;
+        votingDeadline?: string;
+    }) => api.post('/admin/challenges', data),
+
+    updateChallenge: (
+        id: string,
+        data: Partial<{
+            title: string;
+            description: string;
+            genre: string;
+            beatUrl: string;
+            coverImageUrl: string;
+            rules: string;
+            status: 'DRAFT' | 'ACTIVE' | 'VOTING' | 'ENDED' | 'CANCELLED';
+            prizeAmount: number;
+            maxSubmissions: number;
+            submissionDeadline: string;
+            votingDeadline: string;
+        }>
+    ) => api.patch(`/admin/challenges/${id}`, data),
+
+    deleteChallenge: (id: string) => api.delete(`/admin/challenges/${id}`),
+
+    listReports: (params?: {
+        page?: number;
+        limit?: number;
+        status?: 'PENDING' | 'RESOLVED' | 'DISMISSED';
+    }) => api.get('/admin/reports', { params }),
+
+    resolveReport: (id: string, status: 'RESOLVED' | 'DISMISSED', notes?: string) =>
+        api.patch(`/admin/reports/${id}/resolve`, { status, notes }),
+};
+
 export default api;

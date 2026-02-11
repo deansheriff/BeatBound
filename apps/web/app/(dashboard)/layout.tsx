@@ -9,6 +9,7 @@ import {
     Trophy,
     Video,
     User,
+    Shield,
     LogOut,
     Bell,
     Plus,
@@ -19,7 +20,7 @@ import { useAuthStore } from '@/lib/store/auth';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
-const navItems = [
+const baseNavItems = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
     { href: '/challenges', label: 'Challenges', icon: Trophy },
     { href: '/submissions', label: 'My Submissions', icon: Video },
@@ -35,6 +36,9 @@ export default function DashboardLayout({
     const router = useRouter();
     const { user, isAuthenticated, logout, isLoading } = useAuthStore();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const navItems = user?.role === 'ADMIN'
+        ? [...baseNavItems, { href: '/admin', label: 'Admin', icon: Shield }]
+        : baseNavItems;
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {

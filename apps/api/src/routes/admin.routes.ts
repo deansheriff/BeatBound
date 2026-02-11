@@ -41,6 +41,12 @@ function isTransactionType(value: unknown): value is TransactionType {
     return typeof value === 'string' && transactionTypeEnum.enumValues.includes(value as TransactionType);
 }
 
+function parseOptionalDate(value: unknown): Date | undefined {
+    if (!value) return undefined;
+    const parsed = new Date(String(value));
+    return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+}
+
 // Apply admin middleware to all routes
 router.use(authenticate, requireAdmin);
 
@@ -283,6 +289,152 @@ router.get(
     })
 );
 
+// GET /api/admin/challenges/:id
+router.get(
+    '/challenges/:id',
+    asyncHandler(async (req, res) => {
+        const { id } = req.params;
+
+        const [challenge] = await db
+            .select()
+            .from(challenges)
+            .where(eq(challenges.id, id))
+            .limit(1);
+
+        if (!challenge) {
+            throw new NotFoundError('Challenge');
+        }
+
+        res.json({ challenge });
+    })
+);
+
+// POST /api/admin/challenges
+router.post(
+    '/challenges',
+    asyncHandler(async (req: AuthRequest, res) => {
+        const {
+            producerId,
+            title,
+            description,
+            genre,
+            beatUrl,
+            coverImageUrl,
+            rules,
+            prizeAmount,
+            maxSubmissions,
+            submissionDeadline,
+            votingDeadline,
+            status,
+        } = req.body;
+
+        if (!producerId || !title || !description || !genre || !beatUrl) {
+            throw new BadRequestError('producerId, title, description, genre, and beatUrl are required');
+        }
+
+        const [producer] = await db
+            .select({ id: users.id })
+            .from(users)
+            .where(eq(users.id, producerId))
+            .limit(1);
+
+        if (!producer) {
+            throw new BadRequestError('Producer user not found');
+        }
+
+        const [createdChallenge] = await db
+            .insert(challenges)
+            .values({
+                producerId,
+                title,
+                description,
+                genre,
+                beatUrl,
+                coverImageUrl: coverImageUrl || null,
+                rules: rules || null,
+                prizeAmount: String(prizeAmount ?? 0),
+                platformFee: '0',
+                maxSubmissions: Number(maxSubmissions ?? 100),
+                submissionDeadline: parseOptionalDate(submissionDeadline),
+                votingDeadline: parseOptionalDate(votingDeadline),
+                status: isChallengeStatus(status) ? status : 'DRAFT',
+            })
+            .returning();
+
+        await db.insert(auditLogs).values({
+            adminId: req.user!.id,
+            action: 'CHALLENGE_CREATED',
+            targetType: 'CHALLENGE',
+            targetId: createdChallenge.id,
+            details: { producerId, title },
+            ipAddress: req.ip,
+        });
+
+        res.status(201).json({ challenge: createdChallenge });
+    })
+);
+
+// PATCH /api/admin/challenges/:id
+router.patch(
+    '/challenges/:id',
+    asyncHandler(async (req: AuthRequest, res) => {
+        const { id } = req.params;
+        const {
+            title,
+            description,
+            genre,
+            beatUrl,
+            coverImageUrl,
+            rules,
+            status,
+            prizeAmount,
+            maxSubmissions,
+            submissionDeadline,
+            votingDeadline,
+        } = req.body;
+
+        const [existing] = await db
+            .select({ id: challenges.id })
+            .from(challenges)
+            .where(eq(challenges.id, id))
+            .limit(1);
+
+        if (!existing) {
+            throw new NotFoundError('Challenge');
+        }
+
+        const updateData: Record<string, unknown> = { updatedAt: new Date() };
+        if (title !== undefined) updateData.title = title;
+        if (description !== undefined) updateData.description = description;
+        if (genre !== undefined) updateData.genre = genre;
+        if (beatUrl !== undefined) updateData.beatUrl = beatUrl;
+        if (coverImageUrl !== undefined) updateData.coverImageUrl = coverImageUrl;
+        if (rules !== undefined) updateData.rules = rules;
+        if (isChallengeStatus(status)) updateData.status = status;
+        if (prizeAmount !== undefined) updateData.prizeAmount = String(prizeAmount);
+        if (maxSubmissions !== undefined) updateData.maxSubmissions = Number(maxSubmissions);
+        if (submissionDeadline !== undefined) updateData.submissionDeadline = parseOptionalDate(submissionDeadline) ?? null;
+        if (votingDeadline !== undefined) updateData.votingDeadline = parseOptionalDate(votingDeadline) ?? null;
+
+        const [updatedChallenge] = await db
+            .update(challenges)
+            .set(updateData)
+            .where(eq(challenges.id, id))
+            .returning();
+
+        await db.insert(auditLogs).values({
+            adminId: req.user!.id,
+            action: 'CHALLENGE_UPDATED',
+            targetType: 'CHALLENGE',
+            targetId: id,
+            details: { fields: Object.keys(updateData) },
+            ipAddress: req.ip,
+        });
+
+        res.json({ challenge: updatedChallenge });
+    })
+);
+
 // PATCH /api/admin/challenges/:id/cancel
 router.patch(
     '/challenges/:id/cancel',
@@ -318,6 +470,37 @@ router.patch(
         logger.info(`Challenge ${id} cancelled by ${req.user!.id}`);
 
         res.json({ message: 'Challenge cancelled' });
+    })
+);
+
+// DELETE /api/admin/challenges/:id
+router.delete(
+    '/challenges/:id',
+    asyncHandler(async (req: AuthRequest, res) => {
+        const { id } = req.params;
+
+        const [existing] = await db
+            .select({ id: challenges.id })
+            .from(challenges)
+            .where(eq(challenges.id, id))
+            .limit(1);
+
+        if (!existing) {
+            throw new NotFoundError('Challenge');
+        }
+
+        await db.delete(challenges).where(eq(challenges.id, id));
+
+        await db.insert(auditLogs).values({
+            adminId: req.user!.id,
+            action: 'CHALLENGE_DELETED',
+            targetType: 'CHALLENGE',
+            targetId: id,
+            details: {},
+            ipAddress: req.ip,
+        });
+
+        res.json({ message: 'Challenge deleted' });
     })
 );
 
