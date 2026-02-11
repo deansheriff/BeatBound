@@ -19,6 +19,7 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN mkdir -p apps/web/public
 
 # Environment variables must be present at build time for Next.js
 # We use a dummy URL for build to succeed, can be overridden at runtime
