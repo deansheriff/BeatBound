@@ -12,6 +12,44 @@ import { logger } from '../utils/logger.js';
 
 const router = Router();
 
+// GET /api/submissions/mine
+router.get(
+    '/mine',
+    authenticate,
+    asyncHandler(async (req: AuthRequest, res) => {
+        const { page = 1, limit = 20 } = req.query;
+        const offset = (Number(page) - 1) * Number(limit);
+
+        const mySubmissions = await db
+            .select({
+                id: submissions.id,
+                title: submissions.title,
+                description: submissions.description,
+                videoUrl: submissions.videoUrl,
+                thumbnailUrl: submissions.thumbnailUrl,
+                status: submissions.status,
+                voteCount: submissions.voteCount,
+                viewCount: submissions.viewCount,
+                isWinner: submissions.isWinner,
+                createdAt: submissions.createdAt,
+                challenge: {
+                    id: challenges.id,
+                    title: challenges.title,
+                    status: challenges.status,
+                    genre: challenges.genre,
+                },
+            })
+            .from(submissions)
+            .innerJoin(challenges, eq(submissions.challengeId, challenges.id))
+            .where(eq(submissions.artistId, req.user!.id))
+            .orderBy(desc(submissions.createdAt))
+            .limit(Number(limit))
+            .offset(offset);
+
+        res.json({ submissions: mySubmissions });
+    })
+);
+
 // GET /api/submissions/:id
 router.get(
     '/:id',
@@ -271,44 +309,6 @@ router.delete(
         logger.info(`Submission deleted: ${id}`);
 
         res.json({ message: 'Submission deleted' });
-    })
-);
-
-// GET /api/submissions/mine
-router.get(
-    '/mine',
-    authenticate,
-    asyncHandler(async (req: AuthRequest, res) => {
-        const { page = 1, limit = 20 } = req.query;
-        const offset = (Number(page) - 1) * Number(limit);
-
-        const mySubmissions = await db
-            .select({
-                id: submissions.id,
-                title: submissions.title,
-                description: submissions.description,
-                videoUrl: submissions.videoUrl,
-                thumbnailUrl: submissions.thumbnailUrl,
-                status: submissions.status,
-                voteCount: submissions.voteCount,
-                viewCount: submissions.viewCount,
-                isWinner: submissions.isWinner,
-                createdAt: submissions.createdAt,
-                challenge: {
-                    id: challenges.id,
-                    title: challenges.title,
-                    status: challenges.status,
-                    genre: challenges.genre,
-                },
-            })
-            .from(submissions)
-            .innerJoin(challenges, eq(submissions.challengeId, challenges.id))
-            .where(eq(submissions.artistId, req.user!.id))
-            .orderBy(desc(submissions.createdAt))
-            .limit(Number(limit))
-            .offset(offset);
-
-        res.json({ submissions: mySubmissions });
     })
 );
 
