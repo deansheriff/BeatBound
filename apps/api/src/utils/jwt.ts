@@ -1,20 +1,24 @@
 import jwt from 'jsonwebtoken';
+import type { SignOptions } from 'jsonwebtoken';
 
 interface TokenPayload {
     userId: string;
 }
 
 export function generateTokens(userId: string) {
+    const accessExpiresIn = (process.env.JWT_ACCESS_EXPIRES_IN || '15m') as SignOptions['expiresIn'];
+    const refreshExpiresIn = (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as SignOptions['expiresIn'];
+
     const accessToken = jwt.sign(
         { userId } as TokenPayload,
         process.env.JWT_ACCESS_SECRET!,
-        { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m' }
+        { expiresIn: accessExpiresIn }
     );
 
     const refreshToken = jwt.sign(
         { userId } as TokenPayload,
         process.env.JWT_REFRESH_SECRET!,
-        { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
+        { expiresIn: refreshExpiresIn }
     );
 
     return { accessToken, refreshToken };

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { eq } from 'drizzle-orm';
+import { and, eq, ne } from 'drizzle-orm';
 import { db } from '../config/database.js';
 import { challenges, submissions } from '@beatbound/database';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
@@ -52,23 +52,20 @@ router.post(
             throw new BadRequestError('Challenge has reached maximum submissions');
         }
 
-        // Check if user already submitted
+        // Check if user already submitted (ignore failed attempts to allow retry)
         const existingSubmission = await db
             .select({ id: submissions.id })
             .from(submissions)
-            .where(eq(submissions.artistId, req.user!.id))
+            .where(
+                and(
+                    eq(submissions.artistId, req.user!.id),
+                    eq(submissions.challengeId, challengeId),
+                    ne(submissions.status, 'FAILED')
+                )
+            )
             .limit(1);
 
-        // Allow re-upload if previous submission failed
-        const validSubmission = existingSubmission.find(async (sub) => {
-            const [s] = await db
-                .select({ status: submissions.status, challengeId: submissions.challengeId })
-                .from(submissions)
-                .where(eq(submissions.id, sub.id));
-            return s?.status !== 'FAILED' && s?.challengeId === challengeId;
-        });
-
-        if (validSubmission) {
+        if (existingSubmission.length > 0) {
             throw new BadRequestError('You have already submitted to this challenge');
         }
 

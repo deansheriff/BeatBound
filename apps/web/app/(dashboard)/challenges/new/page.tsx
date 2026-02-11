@@ -45,18 +45,6 @@ export default function CreateChallengePage() {
     const user = useAuthStore((state) => state.user);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Redirect if not producer
-    if (user && user.role !== 'PRODUCER' && user.role !== 'ADMIN') {
-        return (
-            <div className="flex flex-col items-center justify-center py-20">
-                <AlertCircle className="h-12 w-12 text-destructive mb-4" />
-                <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
-                <p className="text-muted-foreground mb-6">Only producers can create challenges.</p>
-                <Link href="/dashboard" className="btn-primary">Go to Dashboard</Link>
-            </div>
-        );
-    }
-
     const {
         register,
         handleSubmit,
@@ -70,6 +58,18 @@ export default function CreateChallengePage() {
             prizeAmount: 0,
         },
     });
+
+    // Redirect if not producer
+    if (user && user.role !== 'PRODUCER' && user.role !== 'ADMIN') {
+        return (
+            <div className="flex flex-col items-center justify-center py-20">
+                <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+                <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
+                <p className="text-muted-foreground mb-6">Only producers can create challenges.</p>
+                <Link href="/dashboard" className="btn-primary">Go to Dashboard</Link>
+            </div>
+        );
+    }
 
     const selectedGenre = watch('genre');
     const selectedDuration = watch('durationDays');

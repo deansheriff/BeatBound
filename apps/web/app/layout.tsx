@@ -1,15 +1,10 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import { Providers } from './providers';
 import { Toaster } from 'sonner';
 
-const inter = Inter({
-    subsets: ['latin'],
-    variable: '--font-inter',
-});
-
 export const metadata: Metadata = {
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://beatbound.sherpackage.com'),
     title: 'BeatBound - Video Competition Platform for Music',
     description: 'The ultimate platform for music producers and artists. Create beat challenges, submit video performances, and win prizes.',
     keywords: ['music', 'beat challenge', 'video competition', 'producers', 'artists', 'hip hop', 'rap'],
@@ -34,7 +29,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en" className="dark">
-            <body className={`${inter.variable} font-sans`}>
+            <body className="font-sans">
                 <Providers>
                     {children}
                     <Toaster

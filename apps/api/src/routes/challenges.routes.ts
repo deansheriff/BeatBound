@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { eq, sql, desc, and, gte, lte, ne, or, ilike } from 'drizzle-orm';
 import { db } from '../config/database.js';
-import { challenges, users, submissions } from '@beatbound/database';
+import { challenges, users, submissions, challengeStatusEnum } from '@beatbound/database';
 import { authenticate, optionalAuth, AuthRequest } from '../middleware/auth.js';
 import { requireProducer } from '../middleware/rbac.js';
 import { validate } from '../middleware/validation.js';
@@ -11,6 +11,11 @@ import { stripe, calculatePlatformFee } from '../config/stripe.js';
 import { logger } from '../utils/logger.js';
 
 const router = Router();
+type ChallengeStatus = (typeof challengeStatusEnum.enumValues)[number];
+
+function isChallengeStatus(value: unknown): value is ChallengeStatus {
+    return typeof value === 'string' && challengeStatusEnum.enumValues.includes(value as ChallengeStatus);
+}
 
 // GET /api/challenges
 router.get(
@@ -31,8 +36,8 @@ router.get(
         // Build conditions
         const conditions = [];
 
-        if (status !== 'all') {
-            conditions.push(eq(challenges.status, status as string));
+        if (status !== 'all' && isChallengeStatus(status)) {
+            conditions.push(eq(challenges.status, status));
         } else {
             // Show all except DRAFT (unless owner)
             conditions.push(ne(challenges.status, 'DRAFT'));

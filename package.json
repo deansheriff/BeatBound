@@ -16,7 +16,7 @@
     "test": "npm run test --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "clean": "rimraf node_modules apps/*/node_modules packages/*/node_modules",
-    "db:push": "npm run db:push -w @beatbound/database",
+    "db:push": "npm run push -w @beatbound/database",
     "db:studio": "npm run studio -w @beatbound/database"
   },
   "devDependencies": {

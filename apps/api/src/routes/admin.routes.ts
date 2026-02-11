@@ -7,7 +7,11 @@ import {
     submissions,
     reports,
     transactions,
-    auditLogs
+    auditLogs,
+    userRoleEnum,
+    challengeStatusEnum,
+    reportStatusEnum,
+    transactionTypeEnum,
 } from '@beatbound/database';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/rbac.js';
@@ -15,6 +19,27 @@ import { asyncHandler, NotFoundError, BadRequestError } from '../middleware/erro
 import { logger } from '../utils/logger.js';
 
 const router = Router();
+
+type UserRole = (typeof userRoleEnum.enumValues)[number];
+type ChallengeStatus = (typeof challengeStatusEnum.enumValues)[number];
+type ReportStatus = (typeof reportStatusEnum.enumValues)[number];
+type TransactionType = (typeof transactionTypeEnum.enumValues)[number];
+
+function isUserRole(value: unknown): value is UserRole {
+    return typeof value === 'string' && userRoleEnum.enumValues.includes(value as UserRole);
+}
+
+function isChallengeStatus(value: unknown): value is ChallengeStatus {
+    return typeof value === 'string' && challengeStatusEnum.enumValues.includes(value as ChallengeStatus);
+}
+
+function isReportStatus(value: unknown): value is ReportStatus {
+    return typeof value === 'string' && reportStatusEnum.enumValues.includes(value as ReportStatus);
+}
+
+function isTransactionType(value: unknown): value is TransactionType {
+    return typeof value === 'string' && transactionTypeEnum.enumValues.includes(value as TransactionType);
+}
 
 // Apply admin middleware to all routes
 router.use(authenticate, requireAdmin);
@@ -32,8 +57,8 @@ router.get(
 
         const conditions = [];
 
-        if (role) {
-            conditions.push(eq(users.role, role as string));
+        if (isUserRole(role)) {
+            conditions.push(eq(users.role, role));
         }
 
         if (suspended !== undefined) {
@@ -228,8 +253,8 @@ router.get(
         const offset = (Number(page) - 1) * Number(limit);
 
         const conditions = [];
-        if (status && status !== 'all') {
-            conditions.push(eq(challenges.status, status as string));
+        if (status !== 'all' && isChallengeStatus(status)) {
+            conditions.push(eq(challenges.status, status));
         }
 
         const challengeList = await db
@@ -304,8 +329,9 @@ router.patch(
 router.get(
     '/reports',
     asyncHandler(async (req, res) => {
-        const { page = 1, limit = 20, status = 'PENDING' } = req.query;
+        const { page = 1, limit = 20, status } = req.query;
         const offset = (Number(page) - 1) * Number(limit);
+        const reportStatus = isReportStatus(status) ? status : 'PENDING';
 
         const reportList = await db
             .select({
@@ -324,7 +350,7 @@ router.get(
             })
             .from(reports)
             .innerJoin(users, eq(reports.reporterId, users.id))
-            .where(eq(reports.status, status as string))
+            .where(eq(reports.status, reportStatus))
             .orderBy(desc(reports.createdAt))
             .limit(Number(limit))
             .offset(offset);
@@ -416,8 +442,8 @@ router.get(
         const offset = (Number(page) - 1) * Number(limit);
 
         const conditions = [];
-        if (type) {
-            conditions.push(eq(transactions.type, type as string));
+        if (isTransactionType(type)) {
+            conditions.push(eq(transactions.type, type));
         }
 
         const txList = await db

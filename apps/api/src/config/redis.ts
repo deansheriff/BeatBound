@@ -5,7 +5,7 @@ const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 
 export const redisClient = new Redis(redisUrl, {
     maxRetriesPerRequest: 3,
-    retryDelayOnFailover: 100,
+    retryStrategy: (attempt: number) => Math.min(attempt * 100, 2000),
     lazyConnect: true,
 });
 

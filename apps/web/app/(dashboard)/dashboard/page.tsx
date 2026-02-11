@@ -23,7 +23,7 @@ export default function DashboardPage() {
                         Welcome back, {user?.displayName || user?.username}!
                     </h1>
                     <p className="text-muted-foreground mt-1">
-                        Here's what's happening in your BeatBound world.
+                        Here&apos;s what&apos;s happening in your BeatBound world.
                     </p>
                 </div>
                 {(user?.role === 'PRODUCER' || user?.role === 'ADMIN') && (
